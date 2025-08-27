@@ -1,13 +1,12 @@
+import { db } from '../db';
+import { contentOutlinesTable } from '../db/schema';
 import { type CreateContentOutlineInput, type ContentOutline } from '../schema';
 
-export async function createContentOutline(input: CreateContentOutlineInput): Promise<ContentOutline> {
-    // This is a placeholder declaration! Real code should be implemented here.
-    // The goal of this handler is to create a new content outline for SEO blog articles.
-    // It should persist the outline structure, target keywords, and SEO suggestions in the database.
-    // This forms the foundation for content writers to create SEO-optimized articles.
-    
-    return Promise.resolve({
-        id: 0, // Placeholder ID
+export const createContentOutline = async (input: CreateContentOutlineInput): Promise<ContentOutline> => {
+  try {
+    // Insert content outline record
+    const result = await db.insert(contentOutlinesTable)
+      .values({
         title: input.title,
         target_keyword: input.target_keyword,
         secondary_keywords: input.secondary_keywords,
@@ -17,8 +16,16 @@ export async function createContentOutline(input: CreateContentOutlineInput): Pr
         seo_suggestions: input.seo_suggestions,
         content_type: input.content_type,
         difficulty_level: input.difficulty_level,
-        estimated_reading_time: input.estimated_reading_time,
-        created_at: new Date(),
-        updated_at: new Date()
-    } as ContentOutline);
-}
+        estimated_reading_time: input.estimated_reading_time
+      })
+      .returning()
+      .execute();
+
+    // Return the created content outline
+    const contentOutline = result[0];
+    return contentOutline;
+  } catch (error) {
+    console.error('Content outline creation failed:', error);
+    throw error;
+  }
+};
